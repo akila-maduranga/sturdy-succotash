@@ -55,12 +55,6 @@ async def update_settings(
     bot_settings = await get_or_create_settings(db)
 
     if update.bot_enabled is not None:
-        if update.bot_enabled and settings.read_only:
-            from fastapi import HTTPException
-            raise HTTPException(
-                status_code=400,
-                detail="Cannot enable bot in read-only mode. Add API secret first."
-            )
         bot_settings.bot_enabled = update.bot_enabled
         settings.bot_enabled = update.bot_enabled
 

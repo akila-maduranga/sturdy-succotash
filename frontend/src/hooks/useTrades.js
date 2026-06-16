@@ -42,6 +42,7 @@ export function useAnalytics() {
   const [performance, setPerformance] = useState(null)
   const [signals, setSignals] = useState([])
   const [pnlHistory, setPnlHistory] = useState([])
+  const [hasOpenRouterKey, setHasOpenRouterKey] = useState(true)
 
   useEffect(() => {
     const fetch = async () => {
@@ -54,6 +55,7 @@ export function useAnalytics() {
         setPerformance(perf.data)
         setSignals(sigs.data.signals || [])
         setPnlHistory(pnl.data.history || [])
+        setHasOpenRouterKey(sigs.data.has_openrouter_key ?? true)
       } catch (e) {
         console.error('Analytics fetch error:', e)
       }
@@ -63,7 +65,7 @@ export function useAnalytics() {
     return () => clearInterval(interval)
   }, [])
 
-  return { performance, signals, pnlHistory }
+  return { performance, signals, pnlHistory, hasOpenRouterKey }
 }
 
 export function useBalance() {

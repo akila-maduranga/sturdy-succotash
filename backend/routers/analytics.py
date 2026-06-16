@@ -94,7 +94,8 @@ async def get_latest_signals(db: AsyncSession = Depends(get_db)):
             })
         else:
             signals.append({"symbol": symbol, "signal": "neutral", "strength": 0})
-    return {"signals": signals}
+    has_key = bool(settings.openrouter_api_key and settings.openrouter_api_key.strip() and "your_openrouter_api_key" not in settings.openrouter_api_key)
+    return {"signals": signals, "has_openrouter_key": has_key}
 
 
 @router.get("/pnl-history")

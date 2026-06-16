@@ -143,7 +143,7 @@ function SignalDetailCard({ sig }) {
 }
 
 export default function AIInsights() {
-  const { signals } = useAnalytics()
+  const { signals, hasOpenRouterKey } = useAnalytics()
   const [analyzing, setAnalyzing] = useState(null)
   const [liveResult, setLiveResult] = useState({})
 
@@ -219,7 +219,7 @@ export default function AIInsights() {
       </div>
 
       {/* Note about OpenRouter */}
-      {!signals.some(s => s.ai_reasoning) && (
+      {!hasOpenRouterKey && (
         <div style={{
           marginTop: 20, padding: 16, borderRadius: 10,
           background: 'var(--yellow-dim)', border: '1px solid rgba(245,158,11,0.2)'

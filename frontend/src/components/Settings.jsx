@@ -12,6 +12,8 @@ export default function SettingsPage({ setBotEnabled }) {
   const [local, setLocal] = useState({})
   const [health, setHealth] = useState(null)
 
+  const [loadError, setLoadError] = useState('')
+
   useEffect(() => {
     Promise.all([
       axios.get(`${API}/settings`),
@@ -24,7 +26,10 @@ export default function SettingsPage({ setBotEnabled }) {
         trading_pairs: s.data.trading_pairs,
         ai_model: s.data.ai_model,
       })
-    }).catch(console.error)
+    }).catch(err => {
+      console.error(err)
+      setLoadError(err.response?.data?.detail || err.message || 'Failed to load settings')
+    })
   }, [])
 
   const save = async () => {
@@ -48,6 +53,29 @@ export default function SettingsPage({ setBotEnabled }) {
     { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini (Balanced)' },
     { value: 'meta-llama/llama-3.1-8b-instruct:free', label: 'Llama 3.1 8B (Free)' },
   ]
+
+  if (loadError) return (
+    <div className="fade-in" style={{ padding: 20 }}>
+      <div className="card" style={{ borderColor: 'var(--red)' }}>
+        <h2 style={{ color: 'var(--red)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <AlertTriangle size={24} />
+          Error Loading Settings
+        </h2>
+        <p style={{ color: 'var(--text-secondary)', marginTop: 10, lineHeight: 1.6 }}>
+          The backend API returned an error:
+        </p>
+        <pre style={{
+          background: 'var(--bg-secondary)', padding: 12, borderRadius: 8,
+          color: 'var(--red)', marginTop: 8, overflowX: 'auto', fontFamily: 'var(--font-mono)', fontSize: 13
+        }}>
+          {loadError}
+        </pre>
+        <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    </div>
+  )
 
   if (!settings) return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
@@ -108,13 +136,12 @@ export default function SettingsPage({ setBotEnabled }) {
               <div>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>Auto Trading</div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                  {settings.read_only_mode ? 'Requires trading API key' : 'Enable to auto-execute signals'}
+                  {settings.read_only_mode ? 'Enable paper trading (simulation mode)' : 'Enable to auto-execute signals'}
                 </div>
               </div>
               <label className="toggle">
                 <input type="checkbox"
                   checked={local.bot_enabled || false}
-                  disabled={settings.read_only_mode}
                   onChange={e => setLocal(p => ({ ...p, bot_enabled: e.target.checked }))}
                 />
                 <span className="toggle-slider" />
@@ -122,7 +149,7 @@ export default function SettingsPage({ setBotEnabled }) {
             </div>
             {settings.read_only_mode && (
               <div style={{ fontSize: 11, color: 'var(--yellow)', padding: '8px 10px', borderRadius: 6, background: 'var(--yellow-dim)' }}>
-                ⚠️ Add EXCHANGE_API_SECRET and set READ_ONLY=false in .env to enable live trading
+                ℹ️ Running in simulation mode. Turn off READ_ONLY in .env for live Binance execution.
               </div>
             )}
           </div>
