@@ -238,7 +238,25 @@ _exchange_service: Optional[ExchangeService] = None
 
 async def get_exchange() -> ExchangeService:
     global _exchange_service
-    if _exchange_service is None or not _exchange_service._initialized:
+    current_loop = asyncio.get_event_loop()
+    
+    needs_init = False
+    if _exchange_service is None or not _exchange_service._initialized or _exchange_service.exchange is None:
+        needs_init = True
+    else:
+        # Check if exchange is bound to a different or closed event loop
+        exchange_loop = getattr(_exchange_service.exchange, 'asyncio_loop', None) or getattr(_exchange_service.exchange, 'loop', None)
+        if exchange_loop != current_loop or current_loop.is_closed():
+            needs_init = True
+            if _exchange_service.exchange:
+                try:
+                    # Try closing exchange connection associated with the old loop
+                    asyncio.create_task(_exchange_service.close())
+                except Exception:
+                    pass
+
+    if needs_init:
         _exchange_service = ExchangeService()
         await _exchange_service.initialize()
+        
     return _exchange_service
