@@ -45,6 +45,9 @@ cp .env.example .env
 
 Open `.env` and fill in your settings:
 ```env
+# Python Path (Required for module imports)
+PYTHONPATH=/app
+
 # Binance API (Your API key is preconfigured, add the secret here)
 EXCHANGE_API_KEY=bCclTSqKQiLAU7f0cq1EhLu8JCfZVHW56qUjXBDO0KmkmwZhPtswEcMVZQGtlVnd
 EXCHANGE_API_SECRET=your_binance_api_secret
@@ -58,7 +61,10 @@ OPENROUTER_API_KEY=your_openrouter_api_key
 AI_MODEL=google/gemini-flash-1.5
 
 # Database Settings (Change passwords in production)
+POSTGRES_USER=trader
 POSTGRES_PASSWORD=trader_secret_2024
+POSTGRES_DB=tradingbot
+DATABASE_URL=postgresql+asyncpg://trader:trader_secret_2024@db:5432/tradingbot
 ```
 
 ### 3. Build & Run
@@ -86,6 +92,24 @@ Open your web browser and navigate to:
 ```
 http://your-vps-ip
 ```
+
+### 5. Troubleshooting & Useful Commands
+- **View Bot Execution Logs**:
+  ```bash
+  docker compose logs -f worker
+  ```
+- **View Backend API Logs**:
+  ```bash
+  docker compose logs -f backend
+  ```
+- **Restart the Bot/Worker**:
+  ```bash
+  docker compose restart worker beat
+  ```
+- **Stop All Services**:
+  ```bash
+  docker compose down
+  ```
 
 ---
 
