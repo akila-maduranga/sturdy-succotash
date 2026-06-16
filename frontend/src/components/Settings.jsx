@@ -16,8 +16,8 @@ export default function SettingsPage({ setBotEnabled }) {
 
   useEffect(() => {
     Promise.all([
-      axios.get(`${API}/settings`),
-      axios.get(`${API}/health`)
+      axios.get(`${API}/settings`).catch(err => { err._endpoint = '/settings'; throw err; }),
+      axios.get(`${API}/health`).catch(err => { err._endpoint = '/health'; throw err; })
     ]).then(([s, h]) => {
       setSettings(s.data)
       setHealth(h.data)
@@ -28,7 +28,12 @@ export default function SettingsPage({ setBotEnabled }) {
       })
     }).catch(err => {
       console.error(err)
-      setLoadError(err.response?.data?.detail || err.message || 'Failed to load settings')
+      const endpoint = err._endpoint || 'API'
+      const detail = err.response?.data?.detail 
+        || (err.response?.data ? JSON.stringify(err.response.data) : '')
+        || err.message 
+        || 'Unknown error'
+      setLoadError(`Request to ${endpoint} failed: ${detail} (Status: ${err.response?.status})`)
     })
   }, [])
 
